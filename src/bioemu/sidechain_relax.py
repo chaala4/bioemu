@@ -16,7 +16,7 @@ from tqdm.auto import tqdm
 
 from bioemu.md_utils import get_propka_protonation
 from bioemu.utils import get_conda_prefix
-
+from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
@@ -30,7 +30,7 @@ def _run_faspr(protein_pdb_in: str, protein_pdb_out: str) -> None:
     """Run FASPR to reconstruct side-chains."""
     faspr_exe = os.path.expanduser("~/FASPR/FASPR")
     if not os.path.exists(faspr_exe):
-        subprocess.run("bash", "/home/sarahlewis/install_faspr.sh")
+        subprocess.run(["bash", str(Path(__file__).parent / "install_faspr.sh"), faspr_exe])
 
     result = subprocess.run(
         [
