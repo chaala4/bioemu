@@ -68,10 +68,8 @@ The `bioemu-v1.0` checkpoint contains the model weights used to produce the resu
 
 
 ## Side-chain reconstruction and MD-relaxation
-BioEmu outputs structures in backbone frame representation. To reconstruct the side-chains, several tools are available. As an example, we interface with HPacker (https://github.com/gvisani/hpacker) to conduct side-chain reconstruction, and also provide basic tooling for running a short molecular dynamics (MD) equilibration.
+BioEmu outputs structures in backbone frame representation. To reconstruct the side-chains, several tools are available. As an example, we interface with [FASPR](https://github.com/tommyhuangthu/FASPR) to conduct side-chain reconstruction, and also provide basic tooling for running a short molecular dynamics (MD) equilibration.
 
-> [!WARNING]
-> This code is experimental and relies on a [conda-based package manager](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) due to `hpacker` having `conda` as a dependency. Make sure that `conda` is in your `PATH` before running the following code.
 
 Install optional dependencies:
 
@@ -84,8 +82,7 @@ You can compute side-chain reconstructions via the `bioemu.sidechains_relax` mod
 python -m bioemu.sidechain_relax --pdb-path path/to/topology.pdb --xtc-path path/to/samples.xtc
 ```
 
-> [!NOTE]
-> The first time this module is invoked, it will attempt to install `hpacker` and its dependencies into a separate `hpacker` conda environment. If you wish for it to be installed in a different location, please set the `HPACKER_ENVNAME` environment variable before using this module for the first time.
+The first time this module is invoked, it will attempt to install `FASPR` inside  `${HOME}/FASPR/`.
 
 By default, side-chain reconstruction and local energy minimization are performed (no full MD integration for efficiency reasons).
 Note that the runtime of this code scales with the size of the system.

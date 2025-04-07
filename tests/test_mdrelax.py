@@ -9,8 +9,7 @@ from bioemu.sidechain_relax import main, run_one_md
 BACKBONE_ATOM_SEL = "name C CA N O"
 
 
-def _run_hpacker_mock(protein_pdb_in: str, protein_pdb_out: str) -> None:
-    """hpacker can't be run in CI; use pre-computed file instead"""
+def _run_faspr_mock(protein_pdb_in: str, protein_pdb_out: str) -> None:
     shutil.copy(
         os.path.join(os.path.dirname(__file__), "test_data", "cln_bad_sample_hpacked.pdb"),
         protein_pdb_out,
@@ -26,7 +25,7 @@ def run_one_md_nointegration(
     return run_one_md(frame, only_energy_minimization=only_energy_minimization, simtime_ns=0.0)
 
 
-@patch("bioemu.sidechain_relax._run_hpacker", _run_hpacker_mock)
+@patch("bioemu.sidechain_relax._run_faspr", _run_faspr_mock)
 @patch("bioemu.sidechain_relax.run_one_md", run_one_md_nointegration)
 def test_mdrelax_integration(tmp_path):
     """integration test for md-relaxation pipeline

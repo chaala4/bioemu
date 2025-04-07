@@ -14,18 +14,10 @@ import openmm.unit as u
 import typer
 from tqdm.auto import tqdm
 
-from bioemu.hpacker_setup.setup_hpacker import (
-    HPACKER_DEFAULT_ENVNAME,
-    HPACKER_DEFAULT_REPO_DIR,
-    ensure_hpacker_install,
-)
 from bioemu.md_utils import get_propka_protonation
 from bioemu.utils import get_conda_prefix
 
 logger = logging.getLogger(__name__)
-
-HPACKER_ENVNAME = os.getenv("HPACKER_ENV_NAME", HPACKER_DEFAULT_ENVNAME)
-HPACKER_REPO_DIR = os.getenv("HPACKER_REPO_DIR", HPACKER_DEFAULT_REPO_DIR)
 
 
 class MDProtocol(str, Enum):
@@ -33,23 +25,16 @@ class MDProtocol(str, Enum):
     NVT_EQUIL = "nvt_equil"
 
 
-def _run_hpacker(protein_pdb_in: str, protein_pdb_out: str) -> None:
-    """run hpacker in its environment."""
-    # make sure that hpacker env is set up
-    ensure_hpacker_install(envname=HPACKER_ENVNAME, repo_dir=HPACKER_REPO_DIR)
+def _run_faspr(protein_pdb_in: str, protein_pdb_out: str) -> None:
 
-    _default_hpacker_pythonbin = os.path.join(
-        get_conda_prefix(),
-        "envs",
-        HPACKER_ENVNAME,
-        "bin",
-        "python",
-    )
-    hpacker_pythonbin = os.getenv("HPACKER_PYTHONBIN", _default_hpacker_pythonbin)
+    """Run FASPR to reconstruct side-chains."""
+    faspr_exe = os.path.expanduser("~/FASPR/FASPR")
+    if not os.path.exists(faspr_exe):
+        subprocess.run("bash", "/home/sarahlewis/install_faspr.sh")
 
     result = subprocess.run(
         [
-            hpacker_pythonbin,
+            faspr_exe,
             os.path.abspath(os.path.join(os.path.dirname(__file__), "run_hpacker.py")),
             protein_pdb_in,
             protein_pdb_out,
@@ -57,7 +42,7 @@ def _run_hpacker(protein_pdb_in: str, protein_pdb_out: str) -> None:
     )
 
     if result.returncode != 0:
-        raise RuntimeError(f"Error running hpacker: {result.stderr.decode()}")
+        raise RuntimeError(f"Error running FASPR: {result.stderr.decode()}")
 
 
 def reconstruct_sidechains(traj: mdtraj.Trajectory) -> mdtraj.Trajectory:
@@ -83,8 +68,7 @@ def reconstruct_sidechains(traj: mdtraj.Trajectory) -> mdtraj.Trajectory:
             protein_pdb_in = os.path.join(tmp, f"frame_{n}_bb.pdb")
             protein_pdb_out = os.path.join(tmp, f"frame_{n}_heavyatom.pdb")
             frame.save_pdb(protein_pdb_in)
-
-            _run_hpacker(protein_pdb_in, protein_pdb_out)
+            _run_faspr(protein_pdb_in, protein_pdb_out)
 
             reconstructed.append(mdtraj.load_pdb(protein_pdb_out))
 
