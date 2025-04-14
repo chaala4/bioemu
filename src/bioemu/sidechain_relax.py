@@ -4,6 +4,7 @@ import logging
 import os
 import subprocess
 from enum import Enum
+from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import mdtraj
@@ -15,8 +16,7 @@ import typer
 from tqdm.auto import tqdm
 
 from bioemu.md_utils import get_propka_protonation
-from bioemu.utils import get_conda_prefix
-from pathlib import Path
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,20 +25,26 @@ class MDProtocol(str, Enum):
     NVT_EQUIL = "nvt_equil"
 
 
-def _run_faspr(protein_pdb_in: str, protein_pdb_out: str) -> None:
+def _run_faspr(protein_pdb_in: str, protein_pdb_out: str, silence=True) -> None:
 
     """Run FASPR to reconstruct side-chains."""
     faspr_exe = os.path.expanduser("~/FASPR/FASPR")
     if not os.path.exists(faspr_exe):
         subprocess.run(["bash", str(Path(__file__).parent / "install_faspr.sh"), faspr_exe])
 
+    if silence:
+        out_redict = dict(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        out_redict = {}
     result = subprocess.run(
         [
             faspr_exe,
-            os.path.abspath(os.path.join(os.path.dirname(__file__), "run_hpacker.py")),
+            "-i",
             protein_pdb_in,
+            "-o",
             protein_pdb_out,
-        ]
+        ],
+        **out_redict,
     )
 
     if result.returncode != 0:
