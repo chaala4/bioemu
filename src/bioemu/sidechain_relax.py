@@ -32,10 +32,6 @@ def _run_faspr(protein_pdb_in: str, protein_pdb_out: str, silence=True) -> None:
     if not os.path.exists(faspr_exe):
         subprocess.run(["bash", str(Path(__file__).parent / "install_faspr.sh"), faspr_exe])
 
-    if silence:
-        out_redict = dict(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    else:
-        out_redict = {}
     result = subprocess.run(
         [
             faspr_exe,
@@ -44,7 +40,8 @@ def _run_faspr(protein_pdb_in: str, protein_pdb_out: str, silence=True) -> None:
             "-o",
             protein_pdb_out,
         ],
-        **out_redict,
+        stdout=subprocess.DEVNULL if silence else None,
+        stderr=subprocess.DEVNULL if silence else None,
     )
 
     if result.returncode != 0:
