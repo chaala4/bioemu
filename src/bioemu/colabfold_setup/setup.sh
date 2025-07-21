@@ -20,7 +20,7 @@ ${BASE_PYTHON} -m uv pip install --python ${VENV_FOLDER}/bin/python --force-rein
     "nvidia-cusolver-cu12==11.7.3.90" \
     "nvidia-cusparse-cu12==12.5.8.93" \
     "nvidia-nccl-cu12==2.26.2.post1" \
-    "nvidia-nvjitlink-cu12==12.8.93"
+    "nvidia-nvjitlink-cu12==12.8.93" --prerelease=allow
 
 # Patch colabfold install
 echo "Patching colabfold installation..."
